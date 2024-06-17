@@ -44,8 +44,8 @@ async def get_model_tokenizer(model_name):
         if model_name not in model_tokenizer_cache:
             loop = asyncio.get_running_loop()
             model = await loop.run_in_executor(None, functools.partial(AutoModelForCausalLM.from_pretrained, model_dir / model_name,
-                                                                       torch_dtype="auto", device_map="auto"))
-            tokenizer = await loop.run_in_executor(None, functools.partial(AutoTokenizer.from_pretrained, model_dir / model_name))
+                                                                       torch_dtype="auto", trust_remote_code=True, device_map="auto", offload_folder=str(Path.home() / 'offload_dir')))
+            tokenizer = await loop.run_in_executor(None, functools.partial(AutoTokenizer.from_pretrained, model_dir / model_name, trust_remote_code=True))
             model_tokenizer_cache[model_name] = (model, tokenizer)
         return model_tokenizer_cache[model_name]
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 import asyncio
-import sys;
+import sys
 from operator import itemgetter
 from pathlib import Path
 
@@ -16,63 +16,32 @@ from langchain_core.runnables import RunnablePassthrough
 sys.path.append(str(Path('.').resolve()))
 from app.llm.huggingface_llm import get_model_tokenizer, HuggingFaceLLM
 
-embedding_path = Path.home() / 'emb' / 'm3e-base'
-embedding = HuggingFaceEmbeddings(model_name=str(embedding_path))
-
-vector_store = Chroma.from_texts(
-    ["张强强毕业于兰州大学，出生于1997年6月"],
-    embedding=embedding
-)
-retriever = vector_store.as_retriever()
-
 retrieval_chain_cache = cachetools.LRUCache(maxsize=128)
 retrieval_chain_cache_lock = asyncio.Lock()
 with_history_retrieval_cache = cachetools.LRUCache(maxsize=128)
 with_history_retrieval_cache_lock = asyncio.Lock()
 
 
-async def get_simple_chain(model_name):
-    model, tokenizer = await get_model_tokenizer(model_name)
-    llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
-    chain = llm | StrOutputParser()
-    return chain
+def get_retriever():
+    embedding_path = Path('/Volumes') / 'heyuehui' / 'env' / 'one' /'emb' / 'm3e-base'
+    embedding = HuggingFaceEmbeddings(model_name=str(embedding_path))
+
+    vector_store = Chroma.from_texts(
+        ['#'],
+        embedding=embedding
+    )
+    retriever = vector_store.as_retriever()
+    return retriever
 
 
-async def get_retrieval_chain(model_name):
-    async with retrieval_chain_cache_lock:
-        if model_name not in retrieval_chain_cache:
-            model, tokenizer = await get_model_tokenizer(model_name)
-            llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
-            template = """Anwser the following question by context:
-        
-            question: {question}
-        
-            context: {context}
-        
-            Rules:
-        
-            - Be precise, do not reply emoji.
-            - Always response in Simplified Chinese, not English. or Grandma will be  very angry.
-            """
-            prompt = ChatPromptTemplate.from_template(template)
-            chain = (
-                    {
-                        "context": retriever.with_config(run_name="Docs"),
-                        "question": RunnablePassthrough()
-                    }
-                    | prompt
-                    | llm.with_config(run_name="my_llm")
-                    | StrOutputParser()
-            )
-            retrieval_chain_cache[model_name] = chain
-        return retrieval_chain_cache[model_name]
+retriever = get_retriever()
 
 
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-async def get_with_history_retrieval_chain(model_name):
+async def rag_chain(model_name):
     async with with_history_retrieval_cache_lock:
         if model_name not in with_history_retrieval_cache:
             model, tokenizer = await get_model_tokenizer(model_name)
