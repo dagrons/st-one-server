@@ -55,9 +55,9 @@ async def get_api_key(key: str, db: AsyncSession = Depends(get_db)):
 
 
 @api_key_router.get("/check-api-access")
-async def check_api_access(api_key: APIKey, api_name: str, db: AsyncSession = Depends(get_db)):
+async def check_api_access(api_key: str, api_name: str, db: AsyncSession = Depends(get_db)):
     api_access = await db.execute(
-        select(APIAccess).where(APIAccess.api_key == api_key.key, APIAccess.api_name == api_name))
+        select(APIAccess).where(APIAccess.api_key == api_key, APIAccess.api_name == api_name))
     api_access = api_access.scalar_one_or_none()
     if not api_access:
         raise HTTPException(status_code=403, detail="API access not allowed")

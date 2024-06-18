@@ -1,21 +1,20 @@
 import multiprocessing
 from pathlib import Path
 
-from fastapi import FastAPI
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi_offline import FastAPIOffline
 from sqlalchemy import select
 
 from app.api.api_key import api_key_router
 from app.api.chat import chat_router
-from app.api.user import user_router
 from app.core.database import SessionLocal
 from app.core.logger import logger_process, get_logger
 from app.model.api_key import APIKey, APIAccess
 
-app = FastAPI()
+app = FastAPIOffline()
 app.include_router(chat_router)
-app.include_router(user_router)
+# app.include_router(user_router)
 app.include_router(api_key_router)
 
 

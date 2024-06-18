@@ -23,7 +23,7 @@ with_history_retrieval_cache_lock = asyncio.Lock()
 
 
 def get_retriever():
-    embedding_path = Path('/Volumes') / 'heyuehui' / 'env' / 'one' /'emb' / 'm3e-base'
+    embedding_path = Path.home() /'emb' / 'm3e-base'
     embedding = HuggingFaceEmbeddings(model_name=str(embedding_path))
 
     vector_store = Chroma.from_texts(
@@ -65,9 +65,8 @@ async def rag_chain(model_name):
                     RunnablePassthrough().assign(context=itemgetter('question')
                                                          | retriever.with_config(run_name="Docs")
                                                          | format_docs)
-                    | prompt
-                    | llm.with_config(run_name="my_llm")
-                    | StrOutputParser()
+                    | prompt | llm.with_config(run_name="my_llm") | StrOutputParser()
             )
             with_history_retrieval_cache[model_name] = _internal_chain
         return with_history_retrieval_cache[model_name]
+

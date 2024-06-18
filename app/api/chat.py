@@ -1,3 +1,4 @@
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Request, Depends
@@ -30,5 +31,13 @@ async def stream_chat(model: str, prompt: str, chat_history: Annotated[list[tupl
                     yield token
                 elif kind == "on_llm_end":
                     logger.info(event['data']['output']['generations'])
+            elif name == "Docs":
+                if kind == "on_retriever_end":
+                    documents = []
+                    for doc in event['data']['output']['documents']:
+                        documents.append(doc.page_content)
+                    documents = json.dumps(documents)
+                    logger.info(documents)
+                    yield f"<docs>{documents}</docs>"
 
     return StreamingResponse(stream_gen())
