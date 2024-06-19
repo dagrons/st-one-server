@@ -6,6 +6,7 @@
 
 import asyncio
 import functools
+import os
 import platform
 from pathlib import Path
 from threading import Thread
@@ -19,10 +20,13 @@ from overrides import overrides
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import TextIteratorStreamer
 
+from app.core.config import setting
+
 if platform.system() in ['Windows', 'Linux']:
     device = "cpu"
     try:
         from pynvml import *
+
         h = nvmlDeviceGetHandleByIndex(0)
         info = nvmlDeviceGetMemoryInfo(h)
         free_mem_in_GB = info.free // 1024 ** 2
@@ -30,10 +34,8 @@ if platform.system() in ['Windows', 'Linux']:
             device = "cuda"
     except Exception:
         pass
-    model_dir = Path.home() / 'llm'
 elif platform.system() == 'Darwin':
     device = "mps"
-    model_dir = Path('/Volumes') / 'heyuehui' / 'env' / 'one' / 'llm'
 
 model_tokenizer_cache = cachetools.LRUCache(maxsize=128)
 lock = asyncio.Lock()
@@ -43,9 +45,14 @@ async def get_model_tokenizer(model_name):
     async with lock:
         if model_name not in model_tokenizer_cache:
             loop = asyncio.get_running_loop()
-            model = await loop.run_in_executor(None, functools.partial(AutoModelForCausalLM.from_pretrained, model_dir / model_name,
-                                                                       torch_dtype="auto", trust_remote_code=True, device_map="auto", offload_folder=str(Path.home() / 'offload_dir')))
-            tokenizer = await loop.run_in_executor(None, functools.partial(AutoTokenizer.from_pretrained, model_dir / model_name, trust_remote_code=True))
+            model = await loop.run_in_executor(None, functools.partial(AutoModelForCausalLM.from_pretrained,
+                                                                       os.path.join(setting.MODEL_DIR, model_name),
+                                                                       torch_dtype="auto", trust_remote_code=True,
+                                                                       device_map="auto",
+                                                                       offload_folder=str(Path.home() / 'offload_dir')))
+            tokenizer = await loop.run_in_executor(None, functools.partial(AutoTokenizer.from_pretrained,
+                                                                           os.path.join(setting.MODEL_DIR, model_name),
+                                                                           trust_remote_code=True))
             model_tokenizer_cache[model_name] = (model, tokenizer)
         return model_tokenizer_cache[model_name]
 

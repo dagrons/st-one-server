@@ -27,3 +27,10 @@ class User(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+
+
+class SearchKWArgs(BaseModel):
+    k: int = 20
+    score_threshold: float = 0.2
+    fetch_k: int = 4
+    lambda_mult: float = 0.25

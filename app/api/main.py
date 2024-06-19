@@ -8,14 +8,16 @@ from sqlalchemy import select
 
 from app.api.api_key import api_key_router
 from app.api.chat import chat_router
+from app.api.search import search_router
 from app.core.database import SessionLocal
 from app.core.logger import logger_process, get_logger
 from app.model.api_key import APIKey, APIAccess
 
 app = FastAPIOffline()
 app.include_router(chat_router)
+app.include_router(search_router)
 # app.include_router(user_router)
-app.include_router(api_key_router)
+# app.include_router(api_key_router)
 
 
 @app.on_event('startup')

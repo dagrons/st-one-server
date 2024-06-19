@@ -6,12 +6,12 @@ from operator import itemgetter
 from pathlib import Path
 
 import cachetools
-from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores.chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
+
+from app.core.vectordb import retriever
 
 sys.path.append(str(Path('.').resolve()))
 from app.llm.huggingface_llm import get_model_tokenizer, HuggingFaceLLM
@@ -20,21 +20,6 @@ retrieval_chain_cache = cachetools.LRUCache(maxsize=128)
 retrieval_chain_cache_lock = asyncio.Lock()
 with_history_retrieval_cache = cachetools.LRUCache(maxsize=128)
 with_history_retrieval_cache_lock = asyncio.Lock()
-
-
-def get_retriever():
-    embedding_path = Path.home() /'emb' / 'm3e-base'
-    embedding = HuggingFaceEmbeddings(model_name=str(embedding_path))
-
-    vector_store = Chroma.from_texts(
-        ['#'],
-        embedding=embedding
-    )
-    retriever = vector_store.as_retriever()
-    return retriever
-
-
-retriever = get_retriever()
 
 
 def format_docs(docs):
@@ -63,4 +48,3 @@ async def rag_chain(model_name):
             )
             with_history_retrieval_cache[model_name] = _internal_chain
         return with_history_retrieval_cache[model_name]
-
