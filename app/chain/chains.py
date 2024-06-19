@@ -47,18 +47,12 @@ async def rag_chain(model_name):
             model, tokenizer = await get_model_tokenizer(model_name)
             llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
             prompt = ChatPromptTemplate.from_messages([
-                ('system', 'you are a helpful assistant'),
                 MessagesPlaceholder(variable_name="history"),
                 ('user', """Anwser the following question by context:
         
             question: {question}
         
-            context: {context}
-        
-            Rules:
-        
-            - Be precise, do not reply emoji.
-            - Always response in Simplified Chinese, not English. or Grandma will be  very angry.
+            context: {context}        
             """)
             ])
             _internal_chain = (
