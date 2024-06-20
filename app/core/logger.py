@@ -38,7 +38,7 @@ def logger_process(queue, log_file):
 
     # 创建文件处理器，大小到10MB时轮转
     file_handler = logging.handlers.RotatingFileHandler(
-        log_file, maxBytes=10*1024*1024, backupCount=5)
+        log_file, maxBytes=10*1024*1024, backupCount=5, encoding='utf-8')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(JsonFormatter())
 
