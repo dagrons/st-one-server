@@ -12,6 +12,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
+from langchain_openai import ChatOpenAI
 
 from app.core.vectordb import retriever
 
@@ -31,12 +32,12 @@ def format_docs(docs):
 async def rag_chain(model_name):
     async with with_history_retrieval_cache_lock:
         if model_name not in with_history_retrieval_cache:
-            if model_name == "openai":
-                llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            if model_name in ["gpt-4", "gpt-4o"]:
+                llm = ChatOpenAI(model="gpt-4")
             else:
                 model, tokenizer = await get_model_tokenizer(model_name)
-                llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
-            prompt = ChatPromptTemplate.from_messages([
+                llm = Hugtus
+                PromptTemplate.from_messages([
                 MessagesPlaceholder(variable_name="history"),
                 ('user', """Anwser the following question by context:
         
