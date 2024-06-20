@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 import asyncio
+import os
 import sys
 from operator import itemgetter
 from pathlib import Path
 
 import cachetools
+from langchain.llms import OpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
@@ -29,8 +31,11 @@ def format_docs(docs):
 async def rag_chain(model_name):
     async with with_history_retrieval_cache_lock:
         if model_name not in with_history_retrieval_cache:
-            model, tokenizer = await get_model_tokenizer(model_name)
-            llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
+            if model_name == "openai":
+                llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            else:
+                model, tokenizer = await get_model_tokenizer(model_name)
+                llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
             prompt = ChatPromptTemplate.from_messages([
                 MessagesPlaceholder(variable_name="history"),
                 ('user', """Anwser the following question by context:
