@@ -33,7 +33,7 @@ async def rag_chain(model_name):
     async with with_history_retrieval_cache_lock:
         if model_name not in with_history_retrieval_cache:
             if model_name in ["gpt-4", "gpt-4o"]:
-                llm = ChatOpenAI(model=model_name)
+                llm = ChatOpenAI(model=model_name, streaming=True)
             else:
                 model, tokenizer = await get_model_tokenizer(model_name)
                 llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
