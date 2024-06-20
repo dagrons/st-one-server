@@ -36,8 +36,8 @@ async def rag_chain(model_name):
                 llm = ChatOpenAI(model="gpt-4")
             else:
                 model, tokenizer = await get_model_tokenizer(model_name)
-                llm = Hugtus
-                PromptTemplate.from_messages([
+                llm = HuggingFaceLLM(model=model, tokenizer=tokenizer)
+            prompt = ChatPromptTemplate.from_messages([
                 MessagesPlaceholder(variable_name="history"),
                 ('user', """Anwser the following question by context:
         
