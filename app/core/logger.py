@@ -27,7 +27,7 @@ class JsonFormatter(logging.Formatter):
             "filename": record.filename,
             "funcName": record.funcName,
             "lineno": record.lineno,
-            "message": record.getMessage()
+            "message": record.msg if isinstance(record.msg, dict) else {'message': record.msg}
         }
         return json.dumps(log_record)
 

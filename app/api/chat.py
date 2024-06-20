@@ -24,20 +24,20 @@ async def stream_chat(model: str, prompt: str, chat_history: Annotated[list[tupl
             name = event['name']
             if name == "my_llm":
                 if kind == "on_llm_start":
-                    logger.info(event['data']['input']['prompts'])
+                    logger.info({'event': 'on_llm_start', 'data': event['data']['input']['prompts']})
                 if kind == "on_llm_stream":
                     token = event['data']['chunk']
-                    logger.info(token)
+                    logger.info({'event': 'on_llm_stream', 'data': token})
                     yield token
                 elif kind == "on_llm_end":
-                    logger.info(event['data']['output']['generations'])
+                    logger.info({'event': 'on_llm_end', 'data': event['data']['output']['generations']})
             elif name == "Docs":
                 if kind == "on_retriever_end":
                     documents = []
                     for doc in event['data']['output']['documents']:
                         documents.append(doc.page_content)
                     documents = json.dumps(documents)
-                    logger.info(documents)
+                    logger.info({'event': 'on_retriever_end', 'data': documents})
                     yield f"<docs>{documents}</docs>"
 
     return StreamingResponse(stream_gen())

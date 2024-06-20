@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 from fastapi_offline import FastAPIOffline
 from sqlalchemy import select
 
-from app.api.api_key import api_key_router
 from app.api.chat import chat_router
 from app.api.search import search_router
 from app.core.database import SessionLocal
@@ -29,12 +28,14 @@ async def startup_handler():
     app.state.log_queue = log_queue
     app.state.log_process = log_process
     app.state.logger = get_logger(log_queue)
+    app.state.logger.info({'event': 'on_app_startup', 'data': {'message': 'logger installed'}})
 
 
 @app.on_event('shutdown')
 async def shutdown_handler():
     app.state.log_queue.put(None)
     app.state.log_process.join()
+    app.state.logger.info({'event': 'on_app_shutdown', 'data': {'message': 'logger uninstalled'}})
 
 
 @app.middleware("http")

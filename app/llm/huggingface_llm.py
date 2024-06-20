@@ -22,20 +22,7 @@ from transformers import TextIteratorStreamer
 
 from app.core.config import setting
 
-if platform.system() in ['Windows', 'Linux']:
-    device = "cpu"
-    try:
-        from pynvml import *
 
-        h = nvmlDeviceGetHandleByIndex(0)
-        info = nvmlDeviceGetMemoryInfo(h)
-        free_mem_in_GB = info.free // 1024 ** 2
-        if free_mem_in_GB >= 8:
-            device = "cuda"
-    except Exception:
-        pass
-elif platform.system() == 'Darwin':
-    device = "mps"
 
 model_tokenizer_cache = cachetools.LRUCache(maxsize=128)
 lock = asyncio.Lock()
@@ -48,7 +35,7 @@ async def get_model_tokenizer(model_name):
             model = await loop.run_in_executor(None, functools.partial(AutoModelForCausalLM.from_pretrained,
                                                                        os.path.join(setting.MODEL_DIR, model_name),
                                                                        torch_dtype="auto", trust_remote_code=True,
-                                                                       device_map="auto",
+                                                                       device_map=setting.DEVICE,
                                                                        offload_folder=str(Path.home() / 'offload_dir')))
             tokenizer = await loop.run_in_executor(None, functools.partial(AutoTokenizer.from_pretrained,
                                                                            os.path.join(setting.MODEL_DIR, model_name),
@@ -70,7 +57,7 @@ class HuggingFaceLLM(LLM):
                 {'role': 'user', 'content': prompt}
             ]
             input_texts.append(self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True))
-        model_inputs = self.tokenizer(input_texts, padding=padding, return_tensors='pt').to(device)
+        model_inputs = self.tokenizer(input_texts, padding=padding, return_tensors='pt').to(setting.DEVICE)
         return model_inputs
 
     def _call(self, prompt: str, stop: Optional[List[str]] = None,

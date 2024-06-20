@@ -6,9 +6,9 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud, schema
+from app.core.config import setting
 from app.core.database import get_db
 from app.crud import create_access_token
-from app.core.config import setting
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
