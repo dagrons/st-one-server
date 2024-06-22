@@ -1,4 +1,5 @@
 import multiprocessing
+import uuid
 from pathlib import Path
 
 from fastapi import Request
@@ -9,14 +10,12 @@ from sqlalchemy import select
 from app.api.chat import chat_router
 from app.api.search import search_router
 from app.core.database import SessionLocal
-from app.core.logger import logger_process, get_logger
+from app.core.logger import logger_process, get_nonblocking_logger
 from app.model.api_key import APIKey, APIAccess
 
 app = FastAPIOffline()
 app.include_router(chat_router)
 app.include_router(search_router)
-# app.include_router(user_router)
-# app.include_router(api_key_router)
 
 
 @app.on_event('startup')
@@ -27,7 +26,7 @@ async def startup_handler():
     log_process.start()
     app.state.log_queue = log_queue
     app.state.log_process = log_process
-    app.state.logger = get_logger(log_queue)
+    app.state.logger = get_nonblocking_logger(log_queue)
     app.state.logger.info({'event': 'on_app_startup', 'data': {'message': 'logger installed'}})
 
 
@@ -69,6 +68,23 @@ async def api_key_middleware(request: Request, call_next):
 
     response = await call_next(request)
     return response
+
+
+@app.middleware("http")
+async def trace_id_middleware(request: Request, call_next):
+    trace_id = str(uuid.uuid4())
+    request.state.trace_id = trace_id
+    response = await call_next(request)
+    response.headers['X-Trace-Id'] = trace_id
+    return response
+
+
+def get_logger(request: Request):
+    return request.app.state.logger
+
+
+def get_trace_id(request: Request):
+    return request.state.trace_id
 
 
 @app.get("/health")

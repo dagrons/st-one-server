@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 import asyncio
-import os
 import sys
 from operator import itemgetter
 from pathlib import Path
 
 import cachetools
-from langchain.llms import OpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder

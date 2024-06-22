@@ -61,7 +61,7 @@ def logger_process(queue, log_file):
             break
 
 
-def get_logger(queue):
+def get_nonblocking_logger(queue):
     logger = logging.getLogger('non_blocking_logger')
     logger.setLevel(logging.DEBUG)
     handler = NonBlockingQueueHandler(queue)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     log_process = multiprocessing.Process(target=logger_process, args=(log_queue, log_file))
     log_process.start()
 
-    logger = get_logger(log_queue)
+    logger = get_nonblocking_logger(log_queue)
 
     try:
         while True:

@@ -3,7 +3,7 @@ import os
 import time
 import unittest
 
-from app.core.logger import logger_process, get_logger
+from app.core.logger import logger_process, get_nonblocking_logger
 
 
 class TestNonBlockingLogging(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestNonBlockingLogging(unittest.TestCase):
         self.log_file = 'test_application.log'
         self.log_process = multiprocessing.Process(target=logger_process, args=(self.log_queue, self.log_file))
         self.log_process.start()
-        self.logger = get_logger(self.log_queue)
+        self.logger = get_nonblocking_logger(self.log_queue)
 
     def tearDown(self):
         self.log_queue.put(None)
