@@ -79,14 +79,6 @@ async def trace_id_middleware(request: Request, call_next):
     return response
 
 
-def get_logger(request: Request):
-    return request.app.state.logger
-
-
-def get_trace_id(request: Request):
-    return request.state.trace_id
-
-
 @app.get("/health")
 async def health():
     return {"message": "OK"}

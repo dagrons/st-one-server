@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import StreamingResponse
 
-from app.api.main import get_logger, get_trace_id
+from app.api.dependencies import get_logger, get_trace_id
 from app.chain.chains import rag_chain
 
 chat_router = APIRouter(prefix="/chat")
