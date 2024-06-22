@@ -2,13 +2,17 @@ from typing import Dict
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores.chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
 
 from app.core.config import setting
 from app.schema import SearchKWArgs
 
 
 def get_vectordb():
-    embedding = HuggingFaceEmbeddings(model_name=setting.EMBEDDING_PATH)
+    if setting.EMBEDDING_PATH == "openai":
+        embedding = OpenAIEmbeddings()
+    else:
+        embedding = HuggingFaceEmbeddings(model_name=setting.EMBEDDING_PATH)
     vector_store = Chroma.from_texts(
         ['张强强毕业于兰州大学，今年28岁，喜欢唱，跳，rap，篮球',
          '贺月辉毕业于北京邮电大学，今年25岁，喜欢羽毛球，电影，写代码',

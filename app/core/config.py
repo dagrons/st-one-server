@@ -3,6 +3,7 @@ import os
 import platform
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 
@@ -24,6 +25,7 @@ def get_device():
 
 
 class Setting(BaseModel):
+    load_dotenv()
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
