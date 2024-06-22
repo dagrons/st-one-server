@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi_offline import FastAPIOffline
 from sqlalchemy import select
 
+from app.api.api_key import api_key_router
 from app.api.chat import chat_router
 from app.api.search import search_router
 from app.core.database import SessionLocal
@@ -16,6 +17,7 @@ from app.model.api_key import APIKey, APIAccess
 app = FastAPIOffline()
 app.include_router(chat_router)
 app.include_router(search_router)
+app.include_router(api_key_router)
 
 
 @app.on_event('startup')
@@ -59,12 +61,11 @@ async def api_key_middleware(request: Request, call_next):
                 select(APIAccess).filter(APIAccess.api_key == api_key, APIAccess.api_name == path))
             access_record = result.scalar()
 
-            if access_record:
-                if access_record.access_count >= access_record.access_limit:
-                    return JSONResponse(status_code=403, content={'message': 'API access limit reached'})
-                access_record.access_count += 1
-                session.add(access_record)
-                await session.commit()
+            if not access_record or access_record.access_count >= access_record.access_limit:
+                return JSONResponse(status_code=403, content={'message': 'API access limit reached'})
+            access_record.access_count += 1
+            session.add(access_record)
+            await session.commit()
 
     response = await call_next(request)
     return response
