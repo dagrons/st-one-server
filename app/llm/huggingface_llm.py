@@ -64,7 +64,7 @@ class HuggingFaceLLM(LLM):
               run_manager: Optional[CallbackManagerForLLMRun] = None, **kwargs) -> str:
         model_inputs = self.prepare_model_inputs([prompt])
         # model forward pass
-        generated_ids = self.model.generate(model_inputs.input_ids, max_new_tokens=512)
+        generated_ids = self.model.generate(model_inputs.input_ids, max_new_tokens=3e5)
         generated_ids = [generated_ids[len(input_ids):] for input_ids, generated_ids in
                          zip(model_inputs.input_ids, generated_ids)]
         # decode generation_ids
