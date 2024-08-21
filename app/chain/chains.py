@@ -30,7 +30,7 @@ def format_docs(docs):
 async def rag_chain(model_name):
     async with with_history_retrieval_cache_lock:
         if model_name not in with_history_retrieval_cache:
-            if model_name in ["gpt-4", "gpt-4o"]:
+            if model_name in ["gpt-4", "gpt-4o", "chatgpt-4o-latest"]:
                 llm = ChatOpenAI(model=model_name, streaming=True)
             else:
                 model, tokenizer = await get_model_tokenizer(model_name)
