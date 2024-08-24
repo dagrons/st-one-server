@@ -44,11 +44,12 @@ async def rag_chain(model_name):
             context: {context}        
             """)
             ])
-            _internal_chain = (
+            with_history_retrieval_cache[model_name] = (
                     RunnablePassthrough().assign(context=itemgetter('question')
                                                          | retriever.with_config(run_name="Docs")
                                                          | format_docs)
-                    | prompt | llm.with_config(run_name="my_llm") | StrOutputParser()
+                    | prompt
+                    | llm.with_config(run_name="my_llm")
+                    | StrOutputParser()
             )
-            with_history_retrieval_cache[model_name] = _internal_chain
         return with_history_retrieval_cache[model_name]
