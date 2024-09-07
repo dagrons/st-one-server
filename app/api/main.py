@@ -3,6 +3,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_offline import FastAPIOffline
 from sqlalchemy import select
@@ -18,6 +19,16 @@ app = FastAPIOffline()
 app.include_router(chat_router)
 app.include_router(search_router)
 app.include_router(api_key_router)
+
+origins = ["http://localhost:5173"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event('startup')
