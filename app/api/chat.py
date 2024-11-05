@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import StreamingResponse
+from langchain_core.load import dumps
 
 from app.api.dependencies import get_logger, get_trace_id
 from app.chain.chains import rag_chain
@@ -23,7 +24,7 @@ async def stream_chat(model: str, prompt: str, chat_history: Annotated[list[tupl
                 if kind == "on_llm_start":
                     logger.info({'event': kind, 'data': event['data']['input']['prompts'], 'trace_id': trace_id})
                 elif kind == "on_chat_model_start":
-                    logger.info({'event': kind, 'data': event['data']['input'], 'trace_id': trace_id})
+                    logger.info({'event': kind, 'data': dumps(event['data']['input']), 'trace_id': trace_id})
                 elif kind == "on_llm_stream":
                     token = event['data']['chunk']
                     logger.info({'event': kind, 'data': token, 'trace_id': trace_id})

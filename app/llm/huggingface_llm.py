@@ -7,7 +7,6 @@
 import asyncio
 import functools
 import os
-import platform
 from pathlib import Path
 from threading import Thread
 from typing import Optional, List, Any, Iterator, Mapping, AsyncIterator
@@ -21,8 +20,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import TextIteratorStreamer
 
 from app.core.config import setting
-
-
 
 model_tokenizer_cache = cachetools.LRUCache(maxsize=128)
 lock = asyncio.Lock()
